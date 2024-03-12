@@ -8,10 +8,10 @@ TESTS_DIR := ./tests
 BIN_DIR := ./bin
 
 # Executable settings
-BARCO := barco
-BARCO_ARGS_0 := --help
-BARCO_ARGS_1 := -u 0 -m / -c "/bin/bash -c" -a exit
-BARCO_ARGS_2 := -u 0 -m / -c "/bin/bash -c" -a exit -v
+CORE := core
+CORE_ARGS_0 := --help
+CORE_ARGS_1 := -u 0 -m / -c "/bin/bash -c" -a exit
+CORE_ARGS_2 := -u 0 -m / -c "/bin/bash -c" -a exit -v
 
 # Libraries settings
 LIB_ARGTABLE_REPO := https://github.com/argtable/argtable3/releases/download/v3.2.2.f25c624/argtable-v3.2.2.f25c624-amalgamation.tar.gz
@@ -25,7 +25,7 @@ LIB_LOG_SRC := $(LIB_LOG_DIR)/log.c
 LIB_LOG_FLAGS := -DLOG_USE_COLOR
 
 # Barco object files
-OBJS := $(BARCO).o cgroups.o container.o mount.o sec.o user.o $(LIB_ARGTABLE_NAME).o $(LIB_LOG_NAME).o
+OBJS := $(CORE).o cgroups.o container.o mount.o sec.o user.o $(LIB_ARGTABLE_NAME).o $(LIB_LOG_NAME).o
 
 # Compiler settings
 CC := clang-18
@@ -58,79 +58,79 @@ endif
 
 # Targets
 
-# Build barco executable
-$(BARCO): format lint dir $(OBJS)
-    $(CC) $(CFLAGS) $(LFLAGS) -o $(BIN_DIR)/$(BARCO) $(foreach file,$(OBJS),$(BUILD_DIR)/$(file))
+# Build core executable
+$(CORE): format lint dir $(OBJS)
+	$(CC) $(CFLAGS) $(LFLAGS) -o $(BIN_DIR)/$(CORE) $(foreach file,$(OBJS),$(BUILD_DIR)/$(file))
 
 # Build object files
 %.o: dir $(SRC_DIR)/%.c
-    @$(CC) $(CFLAGS) -o $(BUILD_DIR)/$*.o -c $(SRC_DIR)/$*.c
+	@$(CC) $(CFLAGS) -o $(BUILD_DIR)/$*.o -c $(SRC_DIR)/$*.c
 # Build third-party libraries
 $(LIB_ARGTABLE_NAME).o: dir $(LIB_ARGTABLE_SRC)
-    @$(CC) $(CFLAGS) -o $(BUILD_DIR)/$(LIB_ARGTABLE_NAME).o -c $(LIB_ARGTABLE_SRC)
+	@$(CC) $(CFLAGS) -o $(BUILD_DIR)/$(LIB_ARGTABLE_NAME).o -c $(LIB_ARGTABLE_SRC)
 $(LIB_LOG_NAME).o: dir $(LIB_ARGTABLE_SRC)
-    @$(CC) $(CFLAGS) -o $(BUILD_DIR)/$(LIB_LOG_NAME).o -c $(LIB_LOG_SRC) $(LIB_LOG_FLAGS)
+	@$(CC) $(CFLAGS) -o $(BUILD_DIR)/$(LIB_LOG_NAME).o -c $(LIB_LOG_SRC) $(LIB_LOG_FLAGS)
 
 # Run CUnit tests
 test: dir
-    @$(CC) $(CFLAGS) -lcunit -o $(BIN_DIR)/$(BARCO)_test $(TESTS_DIR)/$(BARCO)_test.c
-    @$(BIN_DIR)/$(BARCO)_test
+	@$(CC) $(CFLAGS) -lcunit -o $(BIN_DIR)/$(CORE)_test $(TESTS_DIR)/$(CORE)_test.c
+	@$(BIN_DIR)/$(CORE)_test
 
 # Run linter on source directories
 lint:
-    @$(LINTER) --config-file=.clang-tidy $(SRC_DIR)/* $(INCLUDE_DIR)/* $(TESTS_DIR)/* -- $(CFLAGS)
+	@$(LINTER) --config-file=.clang-tidy $(SRC_DIR)/* $(INCLUDE_DIR)/* $(TESTS_DIR)/* -- $(CFLAGS)
 
 # Run formatter on source directories
 format:
-    @$(FORMATTER) -style=file -i $(SRC_DIR)/* $(INCLUDE_DIR)/* $(TESTS_DIR)/*
+	@$(FORMATTER) -style=file -i $(SRC_DIR)/* $(INCLUDE_DIR)/* $(TESTS_DIR)/*
 
 # Run valgrind memory checker on executable
-check: $(BARCO)
-    @sudo valgrind -s --leak-check=full --show-leak-kinds=all $(BIN_DIR)/$(BARCO) $(BARCO_ARGS_0)
-    @sudo valgrind -s --leak-check=full --show-leak-kinds=all $(BIN_DIR)/$(BARCO) $(BARCO_ARGS_1)
-    @sudo valgrind -s --leak-check=full --show-leak-kinds=all $(BIN_DIR)/$(BARCO) $(BARCO_ARGS_2)
+check: $(CORE)
+	@sudo valgrind -s --leak-check=full --show-leak-kinds=all $(BIN_DIR)/$(CORE) $(CORE_ARGS_0)
+	@sudo valgrind -s --leak-check=full --show-leak-kinds=all $(BIN_DIR)/$(CORE) $(CORE_ARGS_1)
+	@sudo valgrind -s --leak-check=full --show-leak-kinds=all $(BIN_DIR)/$(CORE) $(CORE_ARGS_2)
 
 # Setup dependencies for build and development
 setup:
-    # Update apt and upgrade packages
-    @sudo apt update
-    @sudo DEBIAN_FRONTEND=noninteractive apt upgrade -y
+	# Update apt and upgrade packages
+	@sudo apt update
+	@sudo DEBIAN_FRONTEND=noninteractive apt upgrade -y
 
-    # Install OS dependencies
-    @sudo apt install -y bash libarchive-tools lsb-release wget software-properties-common gnupg
+	# Install OS dependencies
+	@sudo apt install -y bash libarchive-tools lsb-release wget software-properties-common gnupg
 
-    # Install LLVM tools required for building the project
-    @wget https://apt.llvm.org/llvm.sh
-    @chmod +x llvm.sh
-    @sudo ./llvm.sh 18
-    @rm llvm.sh
+	# Install LLVM tools required for building the project
+	@wget https://apt.llvm.org/llvm.sh
+	@chmod +x llvm.sh
+	@sudo ./llvm.sh 18
+	@rm llvm.sh
 
-    # Install Clang development tools
-    @sudo apt install -y clang-format-18 clang-tidy-18 clang-tools clangd valgrind
+	# Install Clang development tools
+	@sudo apt install -y clang-format-18 clang-tidy-18 clang-tools clangd valgrind
 
-    # Install non-standard system libraries
-    @sudo apt install -y libseccomp-dev libcap-dev
+	# Install non-standard system libraries
+	@sudo apt install -y libseccomp-dev libcap-dev
 
-    # Install CUnit testing framework
-    @sudo apt install -y libcunit1 libcunit1-doc libcunit1-dev
+	# Install CUnit testing framework
+	@sudo apt install -y libcunit1 libcunit1-doc libcunit1-dev
 
-    # Install third-party libraries and structure them
-    @mkdir -p $(LIB_DIR)/argtable $(LIB_DIR)/log
-    @echo "Installing argtable..."
-    @wget -qO- $(LIB_ARGTABLE_REPO) | bsdtar -xvf- --strip=1 -C $(LIB_DIR)/argtable *.c *.h 2> /dev/null
-    @find $(LIB_DIR)/argtable/* -d -type d -exec rm -rf '{}' \; 2> /dev/null
-    @echo "Installing log..."
-    @wget -qO- $(LIB_LOG_REPO) | bsdtar -xvf- --strip=2 -C $(LIB_DIR)/log *.c *.h 2> /dev/null
+	# Install third-party libraries and structure them
+	@mkdir -p $(LIB_DIR)/argtable $(LIB_DIR)/log
+	@echo "Installing argtable..."
+	@wget -qO- $(LIB_ARGTABLE_REPO) | bsdtar -xvf- --strip=1 -C $(LIB_DIR)/argtable *.c *.h 2> /dev/null
+	@find $(LIB_DIR)/argtable/* -d -type d -exec rm -rf '{}' \; 2> /dev/null
+	@echo "Installing log..."
+	@wget -qO- $(LIB_LOG_REPO) | bsdtar -xvf- --strip=2 -C $(LIB_DIR)/log *.c *.h 2> /dev/null
 
-    # Cleanup
-    @sudo apt autoremove -y
+# Cleanup
+	@sudo apt autoremove -y
 
 # Setup build and bin directories
 dir:
-    @mkdir -p $(BUILD_DIR) $(BIN_DIR)
+	@mkdir -p $(BUILD_DIR) $(BIN_DIR)
 
 # Clean build and bin directories
 clean:
-    @rm -rf $(BUILD_DIR) $(BIN_DIR)
+	@rm -rf $(BUILD_DIR) $(BIN_DIR)
 
 .PHONY: lint format check setup dir clean deps
