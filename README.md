@@ -1,4 +1,18 @@
-# Core
-Core microkernel
+# Welcome to the *Core* microkernel
 
-1. $make setup
+Coming soon ...
+
+## Features
+
+Coming soon ...
+
+## Set up project
+
+```
+git clone git@github.com:ghartsel/Core.git
+make setup
+```
+
+## Future work
+
+Coming soon ...
