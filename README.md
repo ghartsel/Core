@@ -53,7 +53,7 @@ cd bin
 
 ## Develop applications with Core
 
-See the [Core Programming Guide](http://gxkernel.s3-website-us-west-1.amazonaws.com/index.html) to learn how to design, build, configure, and deploy an application built on Core, .
+See the [Core Programming Guide](http://gxkernel.s3-website-us-west-1.amazonaws.com/index.html) to learn how to design, build, configure, and deploy an application built on Core.
 
 ## License
 
